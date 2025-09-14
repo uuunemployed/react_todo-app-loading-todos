@@ -10,10 +10,11 @@ import classNames from 'classnames';
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [todoTitle, setTodoTitle] = useState('');
-  const [completedTodo, setCompletedTodo] = useState(true);
+  const [completedTodo, setCompletedTodo] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [selectValue, setSelectValue] = useState('all');
+  const [count, setCount] = useState(0);
 
   const titleField = useRef<HTMLInputElement>(null);
 
@@ -51,6 +52,10 @@ export const App: React.FC = () => {
     getTodos();
   }, []);
 
+  useEffect(() => {
+    setCount(todos.filter(todo => todo.completed === false).length);
+  }, [todos]);
+
   const filteredTodos: Todo[] = useMemo(() => {
     return todos.filter(todo => {
       if (selectValue === 'active') {
@@ -84,7 +89,7 @@ export const App: React.FC = () => {
       return;
     }
 
-    if (todoTitle.length === 0) {
+    if (todoTitle.trim().length === 0) {
       setErrorMessage('Title should not be empty');
 
       return;
@@ -102,7 +107,7 @@ export const App: React.FC = () => {
           <button
             type="button"
             data-cy="ToggleAllButton"
-            className={classNames('todoapp__toggle-all active', {
+            className={classNames('todoapp__toggle-all', {
               active: todos.some(todo => todo.completed),
             })}
           />
@@ -126,7 +131,9 @@ export const App: React.FC = () => {
             return (
               <div
                 data-cy="Todo"
-                className={classNames('todo', { completed: todo.completed })}
+                className={classNames('todo', {
+                  completed: todo.completed,
+                })}
                 key={todo.id}
               >
                 <label className="todo__status-label">
@@ -134,7 +141,7 @@ export const App: React.FC = () => {
                     data-cy="TodoStatus"
                     type="checkbox"
                     className="todo__status"
-                    checked={completedTodo}
+                    checked={todo.completed}
                     onChange={handleChecked}
                   />
                 </label>
@@ -169,7 +176,7 @@ export const App: React.FC = () => {
             })}
           >
             <span className="todo-count" data-cy="TodosCounter">
-              3 items left
+              {count} items left
             </span>
 
             <nav className="filter" data-cy="Filter">
